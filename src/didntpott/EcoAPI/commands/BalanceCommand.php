@@ -2,7 +2,7 @@
 
 namespace didntpott\EcoAPI\commands;
 
-use didntpott\EcoAPI\API;
+use didntpott\EcoAPI\EcoAPI;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
@@ -22,8 +22,8 @@ class BalanceCommand extends Command
             return true;
         }
 
-        $api = API::getInstance();
-        $balance = $api->formatMoney($api->getMoney($sender));
+        $api = EcoAPI::getInstance();
+        $balance = $api->getEconomy()->formatCurrency($api->getEconomy()->getBalance($sender));
 
         $sender->sendMessage("§aYour balance: §e" . $balance);
         return true;

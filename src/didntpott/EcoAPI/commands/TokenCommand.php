@@ -2,7 +2,7 @@
 
 namespace didntpott\EcoAPI\commands;
 
-use didntpott\EcoAPI\API;
+use didntpott\EcoAPI\EcoAPI;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
@@ -22,8 +22,8 @@ class TokenCommand extends Command
             return true;
         }
 
-        $api = API::getInstance();
-        $tokens = $api->formatMoney($api->getTokens($sender));
+        $economy = EcoAPI::getInstance()->getEconomy();
+        $tokens = $economy->formatCurrency($economy->getTokens($sender));
 
         $sender->sendMessage("§aYour tokens: §e" . $tokens);
         return true;

@@ -4,54 +4,44 @@ A powerful and optimized economy management plugin for PocketMine 5 servers.
 
 ## Features
 
-- **Complete Economy System**: Manage both money and tokens for players
-- **Multiplier Support**: Apply earning multipliers to players
-- **Performance Optimized**:
-    - SQLite database with caching system
-    - WAL mode and indexing for fast queries
-- **Command System**:
-    - Player commands: `/balance`, `/token`, `/pay`
-    - Admin commands: `/economy give|take|set|reset|info`
-- **Developer API**: Easily integrate with your plugins
-- **Permission System**: Fine-grained control over economy commands
-
-## Installation
-
-1. Download the latest release from [GitHub](https://github.com/didntpott/EcoAPI/releases)
-2. Place the .phar file in your server's `plugins` folder
-3. Restart your server
-4. Configure the plugin in `plugins/EcoAPI/config.yml`
+- **Performance-Focused**: Optimized for high-performance with optional caching system
+- **Multiple Currencies**: Support for both money and tokens
+- **Multiplier System**: Player-specific multipliers for economy activities
+- **SQLite Database**: Persistent storage of player economy data
+- **Economy Commands**: Full suite of economy management commands
+- **Developer API**: Easy-to-use API for developers to integrate with
 
 ## Commands
 
-| Command | Description | Permission | Aliases |
-|---------|-------------|------------|---------|
-| `/balance` | Check your balance | economy.commands.default | `/bal`, `/money` |
-| `/token` | Check your tokens | economy.commands.default | `/tokens` |
-| `/pay <player> <amount>` | Send money to another player | economy.commands.default | `/transfer` |
-| `/economy give <player> <amount>` | Give money to a player | economy.commands.give | `/eco give` |
-| `/economy take <player> <amount>` | Take money from a player | economy.commands.take | `/eco take` |
-| `/economy set <player> <amount>` | Set a player's balance | economy.commands.set | `/eco set` |
-| `/economy reset <player>` | Reset player's economy data | economy.commands.reset | `/eco reset` |
-| `/economy info <player>` | View player's economy info | economy.commands.info | `/eco info` |
+| Command | Description | Permission |
+|---------|-------------|------------|
+| `/balance` | Check your balance | economy.commands.default |
+| `/token` | Check your tokens | economy.commands.default |
+| `/pay <player> <amount>` | Send money to another player | economy.commands.default |
+| `/economy give <player> <amount>` | Add money to a player | economy.command.give |
+| `/economy take <player> <amount>` | Take money from a player | economy.command.take |
+| `/economy set <player> <amount>` | Set a player's balance | economy.command.set |
+| `/economy reset <player>` | Reset a player's economy data | economy.command.reset |
+| `/economy info <player>` | View a player's economy info | economy.command.info |
 
 ## Permissions
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| economy.commands.default | Access to basic economy commands | true |
-| economy.commands | Access to admin economy commands | op |
-| economy.commands.give | Permission to give money | op |
-| economy.commands.take | Permission to take money | op |
-| economy.commands.set | Permission to set balance | op |
-| economy.commands.reset | Permission to reset data | op |
-| economy.commands.info | Permission to view economy info | op |
+| economy.commands | Access to all economy commands | op |
+| economy.command.give | Allows giving money to others | op |
+| economy.command.take | Allows taking money from others | op |
+| economy.command.set | Allows setting other players' balance | op |
+| economy.command.reset | Allows resetting player economy data | op |
+| economy.command.info | Allows viewing other players' economy data | op |
+| economy.commands.default | Allows access to default commands | true |
 
-## Configuration (config.yml)
+## Configuration
 
 ```yaml
 # Performance Settings
 # Enable caching to improve performance by reducing database queries
+# Player data will be saved to the database when they log out
 use-cache: true
 
 # Default Economy Values
@@ -72,54 +62,71 @@ currency-symbol: "$"
 
 ## For Developers
 
-### API Usage
+### How to Use EcoAPI in Your Plugin
+
+To access the EcoAPI in your plugin, use the following:
 
 ```php
-use didntpott\EcoAPI\API;
+use didntpott\EcoAPI\EcoAPI;
 
-// Get the API instance
-$api = API::getInstance();
-
-// Money operations
-$balance = $api->getMoney($player);
-$api->addMoney($player, 100.0);
-$api->reduceMoney($player, 50.0);
-$api->setMoney($player, 1000.0);
-
-// Token operations
-$tokens = $api->getTokens($player);
-$api->addTokens($player, 10.0);
-$api->reduceTokens($player, 5.0);
-$api->setTokens($player, 20.0);
-
-// Other operations
-$multiplier = $api->getMultiplier($player);
-$api->setMultiplier($player, 1.5);
-$api->transferMoney($sender, $receiver, 100.0);
-$formattedMoney = $api->formatMoney(1000.0); // Returns "$1,000.00"
+// Get the economy instance
+$economy = EcoAPI::getInstance()->getEconomy();
 ```
 
-## Troubleshooting
+### Basic Examples
 
-### Common Issues
+```php
+// Get player balance
+$balance = EcoAPI::getInstance()->getEconomy()->getBalance($player);
 
-1. **Player data not saving**
-    - Ensure your server has proper write permissions for the plugins directory
-    - Check if the database file `plugins/EcoAPI/economy.db` exists and isn't corrupted
-    - Make sure you're using the latest version of the plugin
+// Format currency for display
+$formattedBalance = EcoAPI::getInstance()->getEconomy()->formatCurrency($balance);
 
-2. **Commands not working**
-    - Verify that permissions are set correctly in your permissions plugin
-    - Check console for any error messages
+// Add money to player
+EcoAPI::getInstance()->getEconomy()->addBalance($player, 100.0);
 
-3. **Permission errors**
-    - Make sure you've properly configured your permissions plugin
-    - Verify that the permission nodes match exactly as specified in this README
+// Remove money from player (returns false if player doesn't have enough)
+$success = EcoAPI::getInstance()->getEconomy()->reduceBalance($player, 50.0);
+
+// Transfer money between players
+$success = EcoAPI::getInstance()->getEconomy()->transferBalance($sender, $receiver, 100.0);
+
+// Working with tokens
+$tokens = EcoAPI::getInstance()->getEconomy()->getTokens($player);
+EcoAPI::getInstance()->getEconomy()->addTokens($player, 5.0);
+
+// Working with multipliers
+$multiplier = EcoAPI::getInstance()->getEconomy()->getMultiplier($player);
+EcoAPI::getInstance()->getEconomy()->setMultiplier($player, 1.5);
+```
+
+### Check If Player Has Enough Money
+
+```php
+public function hasEnoughMoney(Player $player, float $amount): bool {
+    return EcoAPI::getInstance()->getEconomy()->getBalance($player) >= $amount;
+}
+```
+
+### Make Purchases
+
+```php
+public function tryPurchase(Player $player, float $cost): bool {
+    return EcoAPI::getInstance()->getEconomy()->reduceBalance($player, $cost);
+}
+```
+
+## Installation
+
+1. Download the latest release from GitHub
+2. Place it in your server's `plugins` folder
+3. Restart your server
+4. Configure the plugin in the `config.yml` file
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This plugin is licensed under the [MIT License](LICENSE).
-
-## Support
-
-For support, please [open an issue](https://github.com/didntpott/EcoAPI/issues) on GitHub.
+This plugin is licensed under the MIT License - see the LICENSE file for details.

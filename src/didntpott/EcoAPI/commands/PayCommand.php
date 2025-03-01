@@ -2,7 +2,6 @@
 
 namespace didntpott\EcoAPI\commands;
 
-use didntpott\EcoAPI\API;
 use didntpott\EcoAPI\EcoAPI;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -47,15 +46,15 @@ class PayCommand extends Command
             return true;
         }
 
-        $api = API::getInstance();
-        if (!$api->transferMoney($sender, $target, $amount)) {
+        $economy = EcoAPI::getInstance()->getEconomy();
+        if (!$economy->transferBalance($sender, $target, $amount)) {
             $sender->sendMessage("§cYou don't have enough money");
             return true;
         }
 
-        $formattedAmount = $api->formatMoney($amount);
-        $senderBalance = $api->formatMoney($api->getMoney($sender));
-        $targetBalance = $api->formatMoney($api->getMoney($target));
+        $formattedAmount = $economy->formatCurrency($amount);
+        $senderBalance = $economy->formatCurrency($economy->getBalance($sender));
+        $targetBalance = $economy->formatCurrency($economy->getBalance($target));
 
         $sender->sendMessage("§aYou sent §e{$formattedAmount} §ato §e{$target->getName()}§a. Your balance: §e{$senderBalance}");
         $target->sendMessage("§aYou received §e{$formattedAmount} §afrom §e{$sender->getName()}§a. Your balance: §e{$targetBalance}");
