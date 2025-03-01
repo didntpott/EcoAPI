@@ -1,0 +1,29 @@
+# CustomEconomy Configuration
+
+# Performance Settings
+# Enable caching to improve performance by reducing database queries
+# Player data will be saved to the database when they log out
+use-cache: true
+
+# Default Economy Values
+# Starting balance for new players
+starting-balance: 1000.0
+
+# Starting tokens for new players
+starting-tokens: 0.0
+
+# Database Settings
+# Database type (currently only sqlite is supported)
+database-type: sqlite
+
+# Format Settings
+# Currency symbol to use when formatting amounts
+currency-symbol: "$"
+
+# Permissions
+# economy.command: Access to the /economy command
+# economy.command.give: Permission to give money to others
+# economy.command.take: Permission to take money from others
+# economy.command.set: Permission to set other players' balance
+# economy.command.reset: Permission to reset player economy data
+# economy.command.info: Permission to view other players' economy data

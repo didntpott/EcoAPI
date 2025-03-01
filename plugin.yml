@@ -1,0 +1,26 @@
+name: EcoAPI
+main: didntpott\EcoAPI\EcoAPI
+version: 1.0.0
+api: 5.0.0
+author: didntpott
+description: A powerful and optimized economy management plugin for PocketMine 5 servers
+
+permissions:
+  economy.command:
+    description: Allows access to the /economy command
+    default: op
+  economy.command.give:
+    description: Allows giving money to other players
+    default: op
+  economy.command.take:
+    description: Allows taking money from other players
+    default: op
+  economy.command.set:
+    description: Allows setting other players' balance
+    default: op
+  economy.command.reset:
+    description: Allows resetting player economy data
+    default: op
+  economy.command.info:
+    description: Allows viewing other players' economy data
+    default: op
