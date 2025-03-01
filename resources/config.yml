@@ -21,9 +21,9 @@ database-type: sqlite
 currency-symbol: "$"
 
 # Permissions
-# economy.command: Access to the /economy command
-# economy.command.give: Permission to give money to others
-# economy.command.take: Permission to take money from others
-# economy.command.set: Permission to set other players' balance
-# economy.command.reset: Permission to reset player economy data
-# economy.command.info: Permission to view other players' economy data
+# economy.commands: Access to the /economy commands
+# economy.commands.give: Permission to give money to others
+# economy.commands.take: Permission to take money from others
+# economy.commands.set: Permission to set other players' balance
+# economy.commands.reset: Permission to reset player economy data
+# economy.commands.info: Permission to view other players' economy data

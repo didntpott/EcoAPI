@@ -94,24 +94,21 @@ class Economy
         if ($this->plugin->isCacheEnabled()) {
             $this->plugin->updateCache($playerName, $field, $value);
         }
-
-        if (!$this->plugin->isCacheEnabled()) {
-            $stmt = $this->db->prepare("UPDATE player SET $field = :value WHERE player_name = :player_name");
-            if (!$stmt) {
-                throw new RuntimeException("Failed to prepare update statement for field `$field`.");
+        $stmt = $this->db->prepare("UPDATE player SET $field = :value WHERE player_name = :player_name");
+        if (!$stmt) {
+            throw new RuntimeException("Failed to prepare update statement for field `$field`.");
+        }
+        $stmt->bindValue(":value", $value, SQLITE3_FLOAT);
+        $stmt->bindValue(":player_name", $playerName, SQLITE3_TEXT);
+        $stmt->execute();
+        if ($this->db->changes() === 0) {
+            $stmtInsert = $this->db->prepare("INSERT INTO player (player_name, $field) VALUES (:player_name, :value)");
+            if (!$stmtInsert) {
+                throw new RuntimeException("Failed to prepare insert statement for field `$field`.");
             }
-            $stmt->bindValue(":value", $value, SQLITE3_FLOAT);
-            $stmt->bindValue(":player_name", $playerName, SQLITE3_TEXT);
-            $stmt->execute();
-            if ($this->db->changes() === 0) {
-                $stmtInsert = $this->db->prepare("INSERT INTO player (player_name, $field) VALUES (:player_name, :value)");
-                if (!$stmtInsert) {
-                    throw new RuntimeException("Failed to prepare insert statement for field `$field`.");
-                }
-                $stmtInsert->bindValue(":player_name", $playerName, SQLITE3_TEXT);
-                $stmtInsert->bindValue(":value", $value, SQLITE3_FLOAT);
-                $stmtInsert->execute();
-            }
+            $stmtInsert->bindValue(":player_name", $playerName, SQLITE3_TEXT);
+            $stmtInsert->bindValue(":value", $value, SQLITE3_FLOAT);
+            $stmtInsert->execute();
         }
 
         return true;

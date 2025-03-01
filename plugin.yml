@@ -6,8 +6,8 @@ author: didntpott
 description: A powerful and optimized economy management plugin for PocketMine 5 servers
 
 permissions:
-  economy.command:
-    description: Allows access to the /economy command
+  economy.commands:
+    description: Allows access to the /economy commands
     default: op
   economy.command.give:
     description: Allows giving money to other players
@@ -24,3 +24,6 @@ permissions:
   economy.command.info:
     description: Allows viewing other players' economy data
     default: op
+  economy.commands.default:
+    description: Allows access to default commands
+    default: true

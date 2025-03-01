@@ -2,7 +2,10 @@
 
 namespace didntpott\EcoAPI;
 
-use didntpott\EcoAPI\command\EconomyCommand;
+use didntpott\EcoAPI\commands\EconomyCommand;
+use didntpott\EcoAPI\commands\BalanceCommand;
+use didntpott\EcoAPI\commands\PayCommand;
+use didntpott\EcoAPI\commands\TokenCommand;
 use didntpott\EcoAPI\provider\Economy;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
@@ -37,10 +40,14 @@ class EcoAPI extends PluginBase implements Listener
 
         $this->economy = new Economy($this, $startingBalance, $startingTokens);
 
-        $this->getServer()->getCommandMap()->register("ecoapi", new EconomyCommand());
+        // Register commands
+        $commandMap = $this->getServer()->getCommandMap();
+        $commandMap->register("ecoapi", new EconomyCommand());
+        $commandMap->register("balance", new BalanceCommand());
+        $commandMap->register("token", new TokenCommand());
+        $commandMap->register("pay", new PayCommand());
 
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
-
     }
 
     private function initDatabase(): void
@@ -166,6 +173,11 @@ class EcoAPI extends PluginBase implements Listener
     public function getPlayerCache(): array
     {
         return $this->playerCache;
+    }
+
+    public function isCacheEnabled(): bool
+    {
+        return $this->useCache;
     }
 
     public function updateCache(string $playerName, string $field, float $value): void

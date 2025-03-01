@@ -1,6 +1,6 @@
 <?php
 
-namespace didntpott\EcoAPI\command;
+namespace didntpott\EcoAPI\commands;
 
 use didntpott\EcoAPI\EcoAPI;
 use pocketmine\command\Command;
@@ -10,14 +10,14 @@ class EconomyCommand extends Command
 {
     public function __construct()
     {
-        parent::__construct("economy", "Manage player economy", "/economy", ["eco", "money"]);
-        $this->setPermission("economy.command");
+        parent::__construct("economy", "Manage player economy", "/economy", ["eco"]);
+        $this->setPermission("economy.commands");
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args): bool
     {
-        if (!$sender->hasPermission("economy.command")) {
-            $sender->sendMessage("§cYou do not have permission to use this command.");
+        if (!$sender->hasPermission("economy.commands")) {
+            $sender->sendMessage("§cYou do not have permission to use this commands.");
             return true;
         }
 
