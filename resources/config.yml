@@ -20,6 +20,64 @@ database-type: sqlite
 # Currency symbol to use when formatting amounts
 currency-symbol: "$"
 
+# Messages
+# You can use the following placeholders:
+# {player} - Target player's name
+# {sender} - Command sender's name
+# {amount} - Amount of money/tokens
+# {balance} - Player's new balance
+# {tokens} - Player's new tokens
+# {multiplier} - Player's multiplier
+messages:
+  error:
+    console-only: "§cThis command can only be used in-game."
+    no-permission: "§cYou do not have permission to use this command."
+    player-not-found: "§cPlayer not found: {player}"
+    amount-positive: "§cAmount must be positive"
+    amount-negative: "§cAmount cannot be negative"
+    insufficient-balance: "§cYou don't have enough money"
+    insufficient-target-balance: "§c{player} doesn't have enough balance"
+    pay-self: "§cYou cannot pay yourself"
+
+  balance:
+    show: "§aYour balance: §e{balance}"
+
+  token:
+    show: "§aYour tokens: §e{tokens}"
+
+  pay:
+    success-sender: "§aYou sent §e{amount} §ato §e{player}§a. Your balance: §e{balance}"
+    success-receiver: "§aYou received §e{amount} §afrom §e{sender}§a. Your balance: §e{balance}"
+
+  economy:
+    give-success-sender: "§aAdded §e{amount} §ato §e{player}§a's balance. New balance: §e{balance}"
+    give-success-receiver: "§aYou received §e{amount}§a. New balance: §e{balance}"
+    take-success-sender: "§aRemoved §e{amount} §afrom §e{player}§a's balance. New balance: §e{balance}"
+    take-success-receiver: "§c{amount} §cwas taken from your balance. New balance: §e{balance}"
+    set-success-sender: "§aSet §e{player}§a's balance to §e{amount}"
+    set-success-receiver: "§aYour balance was set to §e{amount}"
+    reset-success-sender: "§aReset §e{player}§a's economy data"
+    reset-success-receiver: "§aYour economy data has been reset"
+    info-header: "§e--- Economy Info for {player} ---"
+    info-balance: "§aBalance: §e{balance}"
+    info-tokens: "§aTokens: §e{tokens}"
+    info-multiplier: "§aMultiplier: §e{multiplier}x"
+
+  help:
+    header: "§e--- Economy Command Help ---"
+    available-actions: "§aAvailable actions:"
+    give: "§a/economy give <player> <amount> §7- Add money to a player"
+    take: "§a/economy take <player> <amount> §7- Take money from a player"
+    set: "§a/economy set <player> <amount> §7- Set a player's balance"
+    reset: "§a/economy reset <player> §7- Reset a player's economy data"
+    info: "§a/economy info <player> §7- View a player's economy info"
+    usage-give: "§cUsage: /economy give <player> <amount>"
+    usage-take: "§cUsage: /economy take <player> <amount>"
+    usage-set: "§cUsage: /economy set <player> <amount>"
+    usage-reset: "§cUsage: /economy reset <player>"
+    usage-info: "§cUsage: /economy info <player>"
+    usage-pay: "§cUsage: /pay <player> <amount>"
+
 # Permissions
 # economy.commands: Access to the /economy commands
 # economy.commands.give: Permission to give money to others

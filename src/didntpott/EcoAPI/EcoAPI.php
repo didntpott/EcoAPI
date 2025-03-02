@@ -2,11 +2,12 @@
 
 namespace didntpott\EcoAPI;
 
-use didntpott\EcoAPI\commands\EconomyCommand;
 use didntpott\EcoAPI\commands\BalanceCommand;
+use didntpott\EcoAPI\commands\EconomyCommand;
 use didntpott\EcoAPI\commands\PayCommand;
 use didntpott\EcoAPI\commands\TokenCommand;
 use didntpott\EcoAPI\provider\Economy;
+use didntpott\EcoAPI\utils\MessageHandler;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -29,6 +30,7 @@ class EcoAPI extends PluginBase implements Listener
     public function onEnable(): void
     {
         $this->saveDefaultConfig();
+        $this->saveResource("config.yml", false); // Don't overwrite existing config
 
         $this->useCache = $this->getConfig()->get("use-cache", true);
         $startingBalance = $this->getConfig()->get("starting-balance", 0.0);
@@ -37,6 +39,8 @@ class EcoAPI extends PluginBase implements Listener
         $this->initDatabase();
 
         self::setInstance($this);
+
+        MessageHandler::getInstance();
 
         $this->economy = new Economy($this, $startingBalance, $startingTokens);
 
@@ -66,6 +70,12 @@ class EcoAPI extends PluginBase implements Listener
         )");
 
         $this->db->exec("CREATE INDEX IF NOT EXISTS player_name_idx ON player (player_name);");
+    }
+
+    public function reloadMessages(): void
+    {
+        $this->reloadConfig();
+        MessageHandler::getInstance()->reload();
     }
 
     public function onDisable(): void

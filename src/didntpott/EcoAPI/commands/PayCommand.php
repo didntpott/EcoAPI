@@ -3,6 +3,7 @@
 namespace didntpott\EcoAPI\commands;
 
 use didntpott\EcoAPI\EcoAPI;
+use didntpott\EcoAPI\utils\MessageHandler;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
@@ -18,12 +19,12 @@ class PayCommand extends Command
     public function execute(CommandSender $sender, string $commandLabel, array $args): bool
     {
         if (!$sender instanceof Player) {
-            $sender->sendMessage("§cThis command can only be used in-game.");
+            $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.console-only"));
             return true;
         }
 
         if (count($args) < 2) {
-            $sender->sendMessage("§cUsage: /pay <player> <amount>");
+            MessageHandler::getInstance()->sendMessage($sender, "help.usage-pay");
             return true;
         }
 
@@ -31,24 +32,26 @@ class PayCommand extends Command
         $amount = (float)$args[1];
 
         if ($amount <= 0) {
-            $sender->sendMessage("§cAmount must be positive");
+            MessageHandler::getInstance()->sendMessage($sender, "error.amount-positive");
             return true;
         }
 
         $target = EcoAPI::getInstance()->getServer()->getPlayerExact($targetName);
         if ($target === null) {
-            $sender->sendMessage("§cPlayer not found: $targetName");
+            MessageHandler::getInstance()->sendMessage($sender, "error.player-not-found", [
+                "player" => $targetName
+            ]);
             return true;
         }
 
         if ($sender->getName() === $target->getName()) {
-            $sender->sendMessage("§cYou cannot pay yourself");
+            MessageHandler::getInstance()->sendMessage($sender, "error.pay-self");
             return true;
         }
 
         $economy = EcoAPI::getInstance()->getEconomy();
         if (!$economy->transferBalance($sender, $target, $amount)) {
-            $sender->sendMessage("§cYou don't have enough money");
+            MessageHandler::getInstance()->sendMessage($sender, "error.insufficient-balance");
             return true;
         }
 
@@ -56,8 +59,18 @@ class PayCommand extends Command
         $senderBalance = $economy->formatCurrency($economy->getBalance($sender));
         $targetBalance = $economy->formatCurrency($economy->getBalance($target));
 
-        $sender->sendMessage("§aYou sent §e{$formattedAmount} §ato §e{$target->getName()}§a. Your balance: §e{$senderBalance}");
-        $target->sendMessage("§aYou received §e{$formattedAmount} §afrom §e{$sender->getName()}§a. Your balance: §e{$targetBalance}");
+        MessageHandler::getInstance()->sendMessage($sender, "pay.success-sender", [
+            "amount" => $formattedAmount,
+            "player" => $target->getName(),
+            "balance" => $senderBalance
+        ]);
+
+        MessageHandler::getInstance()->sendMessage($target, "pay.success-receiver", [
+            "amount" => $formattedAmount,
+            "sender" => $sender->getName(),
+            "balance" => $targetBalance
+        ]);
+
         return true;
     }
 }

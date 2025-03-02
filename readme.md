@@ -10,6 +10,7 @@ A powerful and optimized economy management plugin for PocketMine 5 servers.
 - **SQLite Database**: Persistent storage of player economy data
 - **Economy Commands**: Full suite of economy management commands
 - **Developer API**: Easy-to-use API for developers to integrate with
+- **Customizable Messages**: All messages can be customized in the config file
 
 ## Commands
 
@@ -58,6 +59,31 @@ database-type: sqlite
 # Format Settings
 # Currency symbol to use when formatting amounts
 currency-symbol: "$"
+
+# Messages
+# All plugin messages can be customized here
+# See the messages section in config.yml for all available options
+```
+
+## Message Customization
+
+All messages in the plugin can be customized through the `config.yml` file. You can use the following placeholders in your messages:
+
+- `{player}` - Target player's name
+- `{sender}` - Command sender's name
+- `{amount}` - Amount of money/tokens
+- `{balance}` - Player's new balance
+- `{tokens}` - Player's new tokens
+- `{multiplier}` - Player's multiplier
+
+Example customization:
+
+```yaml
+messages:
+  balance:
+    show: "§6💰 Your current balance is §e{balance}"
+  pay:
+    success-sender: "§a💸 You sent §e{amount} §ato §e{player}§a. Your balance: §e{balance}"
 ```
 
 ## For Developers

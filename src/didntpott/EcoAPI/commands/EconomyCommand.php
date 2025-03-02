@@ -3,6 +3,7 @@
 namespace didntpott\EcoAPI\commands;
 
 use didntpott\EcoAPI\EcoAPI;
+use didntpott\EcoAPI\utils\MessageHandler;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 
@@ -17,7 +18,7 @@ class EconomyCommand extends Command
     public function execute(CommandSender $sender, string $commandLabel, array $args): bool
     {
         if (!$sender->hasPermission("economy.commands")) {
-            $sender->sendMessage("§cYou do not have permission to use this commands.");
+            $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.no-permission"));
             return true;
         }
 
@@ -25,108 +26,146 @@ class EconomyCommand extends Command
             $this->showHelp($sender);
             return true;
         }
+
         $action = strtolower($args[0]);
         if (count($args) < 2) {
             $this->showActionHelp($sender, $action);
             return true;
         }
+
         $targetName = $args[1];
         $target = EcoAPI::getInstance()->getServer()->getPlayerExact($targetName);
 
         if ($target === null) {
-            $sender->sendMessage("§cPlayer not found: $targetName");
+            $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.player-not-found", [
+                "player" => $targetName
+            ]));
             return true;
         }
+
         $economy = EcoAPI::getInstance()->getEconomy();
+
         switch ($action) {
             case "give":
             case "add":
                 if (!$sender->hasPermission("economy.command.give")) {
-                    $sender->sendMessage("§cYou don't have permission to give money.");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.no-permission"));
                     return true;
                 }
 
                 if (count($args) < 3) {
-                    $sender->sendMessage("§cUsage: /economy give <player> <amount>");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("help.usage-give"));
                     return true;
                 }
 
                 $amount = (float)$args[2];
                 if ($amount <= 0) {
-                    $sender->sendMessage("§cAmount must be positive");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.amount-positive"));
                     return true;
                 }
 
                 $economy->addBalance($target, $amount);
                 $newBalance = $economy->formatCurrency($economy->getBalance($target));
-                $sender->sendMessage("§aAdded §e" . $economy->formatCurrency($amount) . " §ato §e" . $target->getName() . "§a's balance. New balance: §e" . $newBalance);
-                $target->sendMessage("§aYou received §e" . $economy->formatCurrency($amount) . "§a. New balance: §e" . $newBalance);
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.give-success-sender", [
+                    "amount" => $economy->formatCurrency($amount),
+                    "player" => $target->getName(),
+                    "balance" => $newBalance
+                ]));
+
+                $target->sendMessage(MessageHandler::getInstance()->getMessage("economy.give-success-receiver", [
+                    "amount" => $economy->formatCurrency($amount),
+                    "balance" => $newBalance
+                ]));
                 break;
 
             case "take":
             case "remove":
                 if (!$sender->hasPermission("economy.command.take")) {
-                    $sender->sendMessage("§cYou don't have permission to take money.");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.no-permission"));
                     return true;
                 }
 
                 if (count($args) < 3) {
-                    $sender->sendMessage("§cUsage: /economy take <player> <amount>");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("help.usage-take"));
                     return true;
                 }
 
                 $amount = (float)$args[2];
                 if ($amount <= 0) {
-                    $sender->sendMessage("§cAmount must be positive");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.amount-positive"));
                     return true;
                 }
 
                 if (!$economy->reduceBalance($target, $amount)) {
-                    $sender->sendMessage("§c" . $target->getName() . " doesn't have enough balance");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.insufficient-target-balance", [
+                        "player" => $target->getName()
+                    ]));
                     return true;
                 }
 
                 $newBalance = $economy->formatCurrency($economy->getBalance($target));
-                $sender->sendMessage("§aRemoved §e" . $economy->formatCurrency($amount) . " §afrom §e" . $target->getName() . "§a's balance. New balance: §e" . $newBalance);
-                $target->sendMessage("§c" . $economy->formatCurrency($amount) . " §cwas taken from your balance. New balance: §e" . $newBalance);
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.take-success-sender", [
+                    "amount" => $economy->formatCurrency($amount),
+                    "player" => $target->getName(),
+                    "balance" => $newBalance
+                ]));
+
+                $target->sendMessage(MessageHandler::getInstance()->getMessage("economy.take-success-receiver", [
+                    "amount" => $economy->formatCurrency($amount),
+                    "balance" => $newBalance
+                ]));
                 break;
 
             case "set":
                 if (!$sender->hasPermission("economy.command.set")) {
-                    $sender->sendMessage("§cYou don't have permission to set money.");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.no-permission"));
                     return true;
                 }
 
                 if (count($args) < 3) {
-                    $sender->sendMessage("§cUsage: /economy set <player> <amount>");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("help.usage-set"));
                     return true;
                 }
 
                 $amount = (float)$args[2];
                 if ($amount < 0) {
-                    $sender->sendMessage("§cAmount cannot be negative");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.amount-negative"));
                     return true;
                 }
 
                 $economy->updatePlayerField($target, 'balance', $amount);
-                $sender->sendMessage("§aSet §e" . $target->getName() . "§a's balance to §e" . $economy->formatCurrency($amount));
-                $target->sendMessage("§aYour balance was set to §e" . $economy->formatCurrency($amount));
+                $formattedAmount = $economy->formatCurrency($amount);
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.set-success-sender", [
+                    "player" => $target->getName(),
+                    "amount" => $formattedAmount
+                ]));
+
+                $target->sendMessage(MessageHandler::getInstance()->getMessage("economy.set-success-receiver", [
+                    "amount" => $formattedAmount
+                ]));
                 break;
 
             case "reset":
                 if (!$sender->hasPermission("economy.command.reset")) {
-                    $sender->sendMessage("§cYou don't have permission to reset player data.");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.no-permission"));
                     return true;
                 }
 
                 $economy->resetPlayerData($target);
-                $sender->sendMessage("§aReset §e" . $target->getName() . "§a's economy data");
-                $target->sendMessage("§aYour economy data has been reset");
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.reset-success-sender", [
+                    "player" => $target->getName()
+                ]));
+
+                $target->sendMessage(MessageHandler::getInstance()->getMessage("economy.reset-success-receiver"));
                 break;
 
             case "info":
                 if (!$sender->hasPermission("economy.command.info") && $sender->getName() !== $target->getName()) {
-                    $sender->sendMessage("§cYou don't have permission to view other players' economy data.");
+                    $sender->sendMessage(MessageHandler::getInstance()->getMessage("error.no-permission"));
                     return true;
                 }
 
@@ -134,10 +173,21 @@ class EconomyCommand extends Command
                 $tokens = $economy->formatCurrency($economy->getTokens($target));
                 $multiplier = $economy->getMultiplier($target);
 
-                $sender->sendMessage("§e--- Economy Info for " . $target->getName() . " ---");
-                $sender->sendMessage("§aBalance: §e" . $balance);
-                $sender->sendMessage("§aTokens: §e" . $tokens);
-                $sender->sendMessage("§aMultiplier: §e" . $multiplier . "x");
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.info-header", [
+                    "player" => $target->getName()
+                ]));
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.info-balance", [
+                    "balance" => $balance
+                ]));
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.info-tokens", [
+                    "tokens" => $tokens
+                ]));
+
+                $sender->sendMessage(MessageHandler::getInstance()->getMessage("economy.info-multiplier", [
+                    "multiplier" => $multiplier
+                ]));
                 break;
 
             default:
@@ -150,51 +200,54 @@ class EconomyCommand extends Command
 
     private function showHelp(CommandSender $sender): void
     {
-        $sender->sendMessage("§e--- Economy Command Help ---");
-        $sender->sendMessage("§aAvailable actions:");
+        $messageHandler = MessageHandler::getInstance();
+        $sender->sendMessage($messageHandler->getMessage("help.header"));
+        $sender->sendMessage($messageHandler->getMessage("help.available-actions"));
 
         if ($sender->hasPermission("economy.command.give")) {
-            $sender->sendMessage("§a/economy give <player> <amount> §7- Add money to a player");
+            $sender->sendMessage($messageHandler->getMessage("help.give"));
         }
 
         if ($sender->hasPermission("economy.command.take")) {
-            $sender->sendMessage("§a/economy take <player> <amount> §7- Take money from a player");
+            $sender->sendMessage($messageHandler->getMessage("help.take"));
         }
 
         if ($sender->hasPermission("economy.command.set")) {
-            $sender->sendMessage("§a/economy set <player> <amount> §7- Set a player's balance");
+            $sender->sendMessage($messageHandler->getMessage("help.set"));
         }
 
         if ($sender->hasPermission("economy.command.reset")) {
-            $sender->sendMessage("§a/economy reset <player> §7- Reset a player's economy data");
+            $sender->sendMessage($messageHandler->getMessage("help.reset"));
         }
 
-        $sender->sendMessage("§a/economy info <player> §7- View a player's economy info");
+        $sender->sendMessage($messageHandler->getMessage("help.info"));
     }
 
     private function showActionHelp(CommandSender $sender, string $action): void
     {
+        $messageHandler = MessageHandler::getInstance();
+
         switch ($action) {
             case "give":
             case "add":
-                $sender->sendMessage("§cUsage: /economy give <player> <amount>");
+                $sender->sendMessage($messageHandler->getMessage("help.usage-give"));
                 break;
 
             case "take":
             case "remove":
-                $sender->sendMessage("§cUsage: /economy take <player> <amount>");
+                $sender->sendMessage($messageHandler->getMessage("help.usage-take"));
                 break;
 
             case "set":
-                $sender->sendMessage("§cUsage: /economy set <player> <amount>");
+                $sender->sendMessage($messageHandler->getMessage("help.usage-set"));
                 break;
 
             case "reset":
-                $sender->sendMessage("§cUsage: /economy reset <player>");
+                $sender->sendMessage($messageHandler->getMessage("help.usage-reset"));
                 break;
 
             case "info":
-                $sender->sendMessage("§cUsage: /economy info <player>");
+                $sender->sendMessage($messageHandler->getMessage("help.usage-info"));
                 break;
 
             default:
