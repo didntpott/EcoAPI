@@ -6,6 +6,7 @@ use didntpott\EcoAPI\commands\BalanceCommand;
 use didntpott\EcoAPI\commands\EconomyCommand;
 use didntpott\EcoAPI\commands\PayCommand;
 use didntpott\EcoAPI\commands\TokenCommand;
+use didntpott\EcoAPI\commands\TopBalanceCommand;
 use didntpott\EcoAPI\provider\Economy;
 use didntpott\EcoAPI\utils\MessageHandler;
 use pocketmine\event\Listener;
@@ -30,7 +31,7 @@ class EcoAPI extends PluginBase implements Listener
     public function onEnable(): void
     {
         $this->saveDefaultConfig();
-        $this->saveResource("config.yml", false); // Don't overwrite existing config
+        $this->saveResource("config.yml", false);
 
         $this->useCache = $this->getConfig()->get("use-cache", true);
         $startingBalance = $this->getConfig()->get("starting-balance", 0.0);
@@ -50,6 +51,7 @@ class EcoAPI extends PluginBase implements Listener
         $commandMap->register("balance", new BalanceCommand());
         $commandMap->register("token", new TokenCommand());
         $commandMap->register("pay", new PayCommand());
+        $commandMap->register("topbalance", new TopBalanceCommand());
 
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }

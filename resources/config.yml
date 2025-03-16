@@ -78,6 +78,13 @@ messages:
     usage-info: "§cUsage: /economy info <player>"
     usage-pay: "§cUsage: /pay <player> <amount>"
 
+  topbalance:
+    header: "===== Top {count} Players by Balance ====="
+    empty: "§cNo players found with balance."
+    entry: "§e#{position} §f{player}: §a{balance}"
+    error:
+      database: "§cFailed to query the database. Please try again later."
+
 # Permissions
 # economy.commands: Access to the /economy commands
 # economy.commands.give: Permission to give money to others
